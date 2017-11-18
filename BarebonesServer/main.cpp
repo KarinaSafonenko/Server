@@ -4,16 +4,20 @@
 #include<signal.h>
 
 
+
 #pragma comment (lib, "ws2_32.lib")
 
 using namespace std;
+sockaddr_in* adresses[100];
 
-char buff[4096] = "hello, my friend"; //для тестирования сигнала
+char buff[4096]; //для тестирования сигнала
 void handler(int sig);
 
 void main() {
 
 	signal(SIGINT, &handler);
+	u_long cmdptr = 1;
+	ZeroMemory(buff, 4096);
 
 	// Инициализируем винсокет
 	WSADATA wsData;
@@ -33,7 +37,7 @@ void main() {
 	}
 
 	//Привязываем ip и порт сокету
-	sockaddr_in hint;
+	sockaddr_in hint, clientaddr;
 	hint.sin_family = AF_INET;
 	hint.sin_port = htons(5223);
 	hint.sin_addr.S_un.S_addr = INADDR_ANY;
@@ -44,29 +48,28 @@ void main() {
 	listen(listening, SOMAXCONN);
 
 	//Перевод сокета в неблокирующий режим
-	u_long cmdptr = 1;
+	/*u_long cmdptr = 1;
 	int nonBlock = ioctlsocket(listening, FIONBIO, (u_long*)&cmdptr);
 	if (nonBlock == SOCKET_ERROR)
 	{
 		cerr << "Turning on non blocking mode failed." << endl;
-	}
+	}*/
 
 	fd_set master;
 	FD_ZERO(&master);
 	FD_SET(listening, &master);
 
-	char buff[4096];
+	int iSize;
+	int startWrite = 0;
 
 	while (true) {
-
+		//Sleep(1);
 		fd_set copy = master;
 		int socketCount = select(0, &copy, nullptr, nullptr, nullptr);
-		//char buff[4096];
-		ZeroMemory(buff, 4096);
 
 		char idle[] = "";
 		char clientAccepted[] = "";
-		SOCKET client = accept(listening, nullptr, nullptr);
+		char host[NI_MAXHOST];
 
 		for (int i = 0; i < socketCount; i++) {
 			SOCKET sock = copy.fd_array[i];
@@ -74,17 +77,23 @@ void main() {
 				//char buff[4096];
 				//ZeroMemory(buff, 4096);
 				//char idle[] = "";
-				//char clientAccepted[] = "";
-				//SOCKET client = accept(listening, nullptr, nullptr);
+				char clientAccepted[] = "";
+				iSize = sizeof(clientaddr); //
+				SOCKET client = accept(listening, (struct sockaddr *)&clientaddr, &iSize);///
+				int nonBlock = ioctlsocket(client, FIONBIO, (u_long*)&cmdptr);
+				if (nonBlock == SOCKET_ERROR)
+				{
+					cerr << "Turning on non blocking mode failed." << endl;
+				}
+				int count = master.fd_count;
+				adresses[count-1] = (struct sockaddr_in *)&clientaddr;
 				FD_SET(client, &master);
 				//sprintf(idle,"%s%d%s","[",(int)client, "]: idle\n");
 				//cout << idle;
-				//sprintf(clientAccepted,"%s%d%s","[",(int)client,"]: accept new client ?\n");
-				//cout << clientAccepted;
-				//Ждем сообщения от клиента
-				int bytesReceived = recv(client, buff, 4096, 0);
-				//Посылаем сообщение клиенту
-				send(client, buff, bytesReceived + 1, 0);
+				ZeroMemory(host, NI_MAXHOST);
+				inet_ntop(AF_INET, &adresses[count-1]->sin_addr, host, NI_MAXHOST);//&clientaddr.sin_addr
+				sprintf(clientAccepted,"%s%d%s%s%s","[",(int)client,"]: accept new client ",host ,"\n");
+				cout << clientAccepted;
 			}
 			else {
 				char buff[4096];
@@ -94,11 +103,21 @@ void main() {
 				if (bytesIn <= 0) {
 					closesocket(sock);
 					FD_CLR(sock, &master);
-					//sprintf(clientDisconnected, "%s%d%s", "[", (int)client, "]: client ? disconnected\n");
-					//cout << clientDisconnected;
+					ZeroMemory(host, NI_MAXHOST);
+					inet_ntop(AF_INET, &adresses[i]->sin_addr, host, NI_MAXHOST);
+					sprintf(clientDisconnected, "%s%d%s%s%s", "[", (int)sock, "]: client ", host, " disconnected\n");
+					cout << clientDisconnected;
+					adresses[i] = NULL;
+					int k = i;
+					k++;
+					while (adresses[k] != NULL && k!=0) {
+						adresses[k - 1] = adresses[k];
+						k++;
+					}
 				}
 				else {
 					cout << string(buff, 0, bytesIn) << endl; // ? Проверить
+					send(sock, buff, strlen(buff) + 1, 0);
 					//send(client, wel.c_str(), wel.size() + 1, 0);
 				}
 			}
@@ -122,7 +141,7 @@ void handler(int sig)
 
 	cout << filename << endl;
 
-	buff[4096] = NULL;
+	ZeroMemory(buff, 4096);
 }
 
 /*
