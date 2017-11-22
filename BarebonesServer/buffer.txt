@@ -1,0 +1,44 @@
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[284]: accept new client 192.168.0.103
+[276]: idle
+[276]: idle
+[276]: idle
+[184]: accept new client 192.168.0.103
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[276]: idle
+[184]: perfect
+[184]: idle
+[184]: idle
+[184]: idle
+[184]: idle
+[184]: idle
+[184]: idle
+[184]: idle
+[284]: banana
+[284]: idle
+[284]: idle
+[284]: idle
+[184]: client 192.168.0.103 disconnected
+[184]: idle
+[184]: idle
+[184]: idle
+[184]: idle
+[184]: idle
+[184]: idle
+[184]: idle
+[284]: client 192.168.0.103 disconnected
+[284]: idle
+[284]: idle
