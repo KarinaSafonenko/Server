@@ -1,0 +1,31 @@
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[144]: accept new client 192.168.43.198
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[148]: idle
+[144]: erteu
+[144]: idle
+[144]: idle
+[144]: idle
+[144]: idle
+[144]: idle
+[144]: idle
+[144]: idle
+[144]: client 192.168.43.198 disconnected
+[144]: idle
+[144]: idle
+[144]: idle
+[144]: idle

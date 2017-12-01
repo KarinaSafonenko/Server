@@ -5,6 +5,7 @@
 #include<map>
 #include<vector>
 #include <fstream>
+#include <direct.h>
 
 #pragma comment (lib, "ws2_32.lib")
 
@@ -15,8 +16,11 @@ vector<string> buffer;
 void handler(int sig);
 struct timeval timeout;
 int desc;
+int port;
 
 void main() {
+	cout << "Port: ";
+	cin >> port;
 	signal(SIGINT, &handler);
 	u_long cmdptr = 1;
 
@@ -84,12 +88,6 @@ void main() {
 				char clientAccepted[] = "";
 				iSize = sizeof(clientaddr); 
 				SOCKET client = accept(listening, (struct sockaddr *)&clientaddr, &iSize);
-				int nonBlock = ioctlsocket(client, FIONBIO, (u_long*)&cmdptr);
-				if (nonBlock == SOCKET_ERROR)
-				{
-					cerr << "Turning on non blocking mode failed." << endl;
-				}
-				int count = master.fd_count;
 				struct sockaddr_in *s = (struct sockaddr_in *)&clientaddr;
 				FD_SET(client, &master);
 				ZeroMemory(host, NI_MAXHOST);
@@ -134,7 +132,13 @@ void main() {
 void handler(int sig)
 {
 	string filename = "buffer.txt";
-	ofstream fout("buffer.txt"); // создаём объект класса ofstream для записи и связываем его с файлом buffer.txt
+	char current_work_dir[FILENAME_MAX];
+	_getcwd(current_work_dir, sizeof(current_work_dir));
+	strcat(current_work_dir, "\\tmp\\");
+	DWORD dwFileAttributes = GetFileAttributes(current_work_dir);
+	if (dwFileAttributes == 0xFFFFFFFF)
+		CreateDirectory(current_work_dir, NULL);
+	ofstream fout("tmp\\buffer.txt"); // создаём объект класса ofstream для записи и связываем его с файлом buffer.txt
 	for (int i = 0; i < buffer.size(); i++) {
 		fout << buffer[i]; // запись строки в файл
 	}
