@@ -18,9 +18,8 @@ struct timeval timeout;
 int desc;
 int port;
 
-void main() {
-	cout << "Port: ";
-	cin >> port;
+void main(int argc, char* argv[]) {
+	port = atoi(argv[0]);
 	signal(SIGINT, &handler);
 	u_long cmdptr = 1;
 
@@ -131,18 +130,17 @@ void main() {
 
 void handler(int sig)
 {
-	string filename = "buffer.txt";
-	char current_work_dir[FILENAME_MAX];
-	_getcwd(current_work_dir, sizeof(current_work_dir));
-	strcat(current_work_dir, "\\tmp\\");
-	DWORD dwFileAttributes = GetFileAttributes(current_work_dir);
-	if (dwFileAttributes == 0xFFFFFFFF)
-		CreateDirectory(current_work_dir, NULL);
-	ofstream fout("tmp\\buffer.txt"); // создаём объект класса ofstream для записи и связываем его с файлом buffer.txt
+	char tmpname[L_tmpnam];
+	char* filename;
+	FILE *tmpfp;
+	filename = tmpnam(tmpname);
+	tmpfp = tmpfile();
+	if (tmpfp) printf("Opened a temporary file\n");
+	else perror("tmpfile");
 	for (int i = 0; i < buffer.size(); i++) {
-		fout << buffer[i]; // запись строки в файл
+		fwrite(buffer[i].c_str(), sizeof(char), buffer[i].size(), tmpfp);
 	}
-	fout.close();
-	cout << filename << endl;
+	fclose(tmpfp);
+	printf("Temporary file name is: %s\n", filename);
 	buffer.clear();
 }
